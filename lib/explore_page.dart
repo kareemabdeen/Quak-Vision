@@ -7,6 +7,7 @@ import 'package:flutter_earth_globe/point_connection.dart';
 import 'package:quake_vision/dummy_data.dart';
 import 'package:quake_vision/mars_seismic_events.dart';
 import 'package:quake_vision/moon_seismic_data.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({Key? key}) : super(key: key);
@@ -68,9 +69,9 @@ class ExplorePageState extends State<ExplorePage>
               ? Colors.blueAccent.withOpacity(0.8)
               : Colors.blueAccent.withOpacity(0.5),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-                color: Colors.black.withOpacity(0.4),
+                color: Color.fromARGB(255, 2, 10, 28),
                 blurRadius: 10,
                 spreadRadius: 2)
           ]),
@@ -88,9 +89,9 @@ class ExplorePageState extends State<ExplorePage>
   initState() {
     seismicEvents = moonSeismicEvents; //pfTODO: replace by earth data
     _controller = FlutterEarthGlobeController(
-        rotationSpeed: 0.05,
+        rotationSpeed: 0.1,
         zoom: 0.5,
-        isRotating: false,
+        isRotating: true,
         isBackgroundFollowingSphereRotation: true,
         background: Image.asset('assets/2k_stars.jpg').image,
         surface: Image.asset('assets/2k_earth-day.jpg').image);
@@ -122,9 +123,6 @@ class ExplorePageState extends State<ExplorePage>
               "${event['mission_name']} ${event['date']} ${event['time']}" ==
               newValue,
           orElse: () => {});
-
-      // Update the selected event data
-      if (selectedEvent.isNotEmpty) {
         _selectedEventData = selectedEvent;
 
         _controller.focusOnCoordinates(
@@ -132,14 +130,12 @@ class ExplorePageState extends State<ExplorePage>
               selectedEvent['latitude'], selectedEvent['longitude']),
           animate: true,
         );
-      } else {
-        _selectedEventData = null;
-      }
+      
     });
   }
 
   Widget getDividerText(String text) => Card(
-        color: Colors.black12.withOpacity(0.8),
+        color: Color.fromARGB(255, 2, 10, 28),
         child: SizedBox(
           width: 250,
           child: Row(
@@ -179,11 +175,13 @@ class ExplorePageState extends State<ExplorePage>
                 child: Card(
                   color: _selectedSurface == texture
                       ? Colors.grey[800]
-                      : Colors.black12.withOpacity(0.8),
+                      : Color.fromARGB(255, 2, 10, 28),
                   child: InkWell(
                     onTap: () {
                       _controller.loadSurface(Image.asset(texture).image);
                       setState(() {
+                        _selectedSeismicEvent = null;
+                        _selectedEventData = null;
                         _selectedSurface = texture;
                         for (var point in points) {
                           _controller.removePoint(point.id);
@@ -238,7 +236,7 @@ class ExplorePageState extends State<ExplorePage>
   Widget getListAction(String label, Widget child, {Widget? secondary}) {
     return FittedBox(
       child: Card(
-        color: Colors.black12.withOpacity(0.8),
+        color: Color.fromARGB(255, 2, 10, 28),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
           child: Column(
@@ -411,13 +409,13 @@ class ExplorePageState extends State<ExplorePage>
       extendBodyBehindAppBar: true,
       drawer: MediaQuery.of(context).size.width < 800
           ? Container(
-              color: Colors.black12.withOpacity(0.8),
+              color: Color.fromARGB(255, 2, 10, 28),
               child: leftSideContent(),
             )
           : null,
       endDrawer: MediaQuery.of(context).size.width < 800
           ? Container(
-              color: Colors.black12.withOpacity(0.8),
+              color: Color.fromARGB(255, 2, 10, 28),
               child: rightSideContent(),
             )
           : null,
@@ -456,7 +454,7 @@ class ExplorePageState extends State<ExplorePage>
                 SizedBox(
                   width: 250,
                   child: Card(
-                    color: Colors.black12.withOpacity(0.8),
+                    color: Color.fromARGB(255, 2, 10, 28),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -467,7 +465,7 @@ class ExplorePageState extends State<ExplorePage>
                           ),
                           DropdownButton<String>(
                             dropdownColor: Colors.grey[850],
-                            value: _selectedSeismicEvent,
+                            value: null,
                             isExpanded: true,
                             hint: const Text(
                               'Select a Seismic Event',
@@ -503,7 +501,7 @@ class ExplorePageState extends State<ExplorePage>
               child: Container(
                 width: 300,
                 decoration: BoxDecoration(
-                  color: Colors.black12.withOpacity(0.8),
+                  color: Color.fromARGB(255, 2, 10, 28),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
@@ -563,6 +561,56 @@ class ExplorePageState extends State<ExplorePage>
                       'url: ${_selectedEventData!['url']}',
                       style: const TextStyle(color: Colors.white),
                     ),
+                  ],
+                ),
+              ),
+            ),
+          if (_selectedEventData != null)
+            Positioned(
+              bottom: 30,
+              left: 30,
+              child: Container(
+                width: 300,
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 2, 10, 28),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Explore filtered seismic data analysis ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: TextButton(
+                          onPressed: () async {
+                            if (await canLaunchUrl(
+                                Uri.parse(_selectedEventData!['url']))) {
+                              await launchUrl(
+                                  Uri.parse(_selectedEventData!['url']));
+                            } else {}
+                          },
+                          child: const Text(
+                            'Explore',
+                            style: TextStyle(color: Colors.white),
+                          )),
+                    )
+                      
                   ],
                 ),
               ),

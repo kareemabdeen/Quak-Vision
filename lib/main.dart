@@ -46,9 +46,8 @@ class WebLikeScrollNavigationState extends State<WebLikeScrollNavigation> {
           scrollDirection: Axis.vertical,
           physics: const BouncingScrollPhysics(),
           children: const [
-            ExplorePage(),
             OnBoardingPage(),
-
+            ExplorePage(),
             AboutScreen(),
             ContactPage(),
           ],

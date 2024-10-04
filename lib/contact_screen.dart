@@ -118,26 +118,32 @@ class TeamMember extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 170,
       width: 100,
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        elevation: 4,
+        elevation: 20,
+        shadowColor: Colors.black.withOpacity(0.8),
+        borderOnForeground: true,
+        semanticContainer: true,
+        surfaceTintColor: Colors.transparent,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: Colors.black12.withOpacity(0.8),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
+            gradient: const LinearGradient(
+              colors: [
+                Colors.black12,
+                Colors.black87,
+                Colors.blueAccent,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -250,7 +256,6 @@ class TeamMemberModel {
     required this.gmail,
   });
 }
-
 List<TeamMemberModel> teamMembers = [
   TeamMemberModel(
     imageUrl: 'assets/aya_nady.jpg',
@@ -264,7 +269,7 @@ List<TeamMemberModel> teamMembers = [
     imageUrl: 'assets/kareem_abdeen.jpeg',
     name: 'Kareem Abdeen',
     jobTitle: 'Software Engineer',
-    linkedInUrl: 'https://linkedin.com/in/ezzat',
+    linkedInUrl: 'https://www.linkedin.com/in/kareemabdeen/',
     githubUrl: 'https://github.com/kareemabdeen',
     gmail: 'kareemabdeen222@gmail.com',
   ),
@@ -281,7 +286,7 @@ List<TeamMemberModel> teamMembers = [
     name: 'Sondos Amr',
     jobTitle: 'AI Engineer',
     linkedInUrl: 'https://www.linkedin.com/in/sondos-amr/',
-    githubUrl: 'https://github.com/farid',
+    githubUrl: 'https://github.com/sondosamr',
     gmail: 'sa3178@fayoum.edu.eg',
   ),
 ];
