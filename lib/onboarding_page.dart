@@ -1,4 +1,4 @@
-import 'dart:async'; // For Timer
+import 'dart:async'; 
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -50,7 +50,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               opacity: _opacity,
               child: const Center(
                 child: Text(
-                  'QUAKE',
+                  'QUAKE VISION',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

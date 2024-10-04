@@ -5,6 +5,8 @@ import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_earth_globe/point.dart';
 import 'package:flutter_earth_globe/point_connection.dart';
 import 'package:quake_vision/dummy_data.dart';
+import 'package:quake_vision/mars_seismic_events.dart';
+import 'package:quake_vision/moon_seismic_data.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({Key? key}) : super(key: key);
@@ -32,46 +34,8 @@ class ExplorePageState extends State<ExplorePage>
     'assets/2k_moon.jpg',
   ];
 
-  final List<Map<String, dynamic>> _seismicEvents = [
-    {
-      'name': 'Nakamura 1979 - SM - 1971/107',
-      'type': 'SM - Shallow Moonquake',
-      'date': '1971/107',
-      'time': '07:00:55',
-      'epicenter': '48°, 35°',
-      'magnitude': 2.8,
-      'depth': 'N/A',
-      'detectedBy': 'Apollo Sites: 12, 14',
-      'coordinates': const GlobeCoordinates(10.0, 20.0)
-    },
-    {
-      'name': 'Nakamura 1979 - SM - 1971/140',
-      'type': 'SM - Shallow Moonquake',
-      'date': '1971/140',
-      'time': '08:00:12',
-      'epicenter': '52°, 38°',
-      'magnitude': 3.1,
-      'depth': 'N/A',
-      'detectedBy': 'Apollo Sites: 12',
-      'coordinates': const GlobeCoordinates(15.0, 25.0)
-    },
-    {
-      'name': 'Nakamura 1979 - SM - 1972/002',
-      'type': 'SM - Shallow Moonquake',
-      'date': '1972/002',
-      'time': '06:30:45',
-      'epicenter': '44°, 32°',
-      'magnitude': 2.6,
-      'depth': 'N/A',
-      'detectedBy': 'Apollo Sites: 12, 15',
-      'coordinates': const GlobeCoordinates(30.0, -10.0)
-    },
-    // Add more events as needed
-  ];
-
   List<Point> points = [];
-  List<PointConnection> connections = [];
-
+  List<Map<String, dynamic>> seismicEvents = [];
   Widget pointLabelBuilder(
       BuildContext context, Point point, bool isHovering, bool visible) {
     return Container(
@@ -122,6 +86,7 @@ class ExplorePageState extends State<ExplorePage>
 
   @override
   initState() {
+    seismicEvents = moonSeismicEvents; //pfTODO: replace by earth data
     _controller = FlutterEarthGlobeController(
         rotationSpeed: 0.05,
         zoom: 0.5,
@@ -137,8 +102,12 @@ class ExplorePageState extends State<ExplorePage>
     };
 
     for (var point in points) {
-      _controller.addPoint(point);
+      _controller
+        ..addPoint(point)
+        ..updatePoint(point.id, style: point.style.copyWith(size: 1000));
+      
     }
+    
 
     super.initState();
   }
@@ -148,15 +117,19 @@ class ExplorePageState extends State<ExplorePage>
       _selectedSeismicEvent = newValue;
 
       // Find the selected event based on the name
-      final selectedEvent = _seismicEvents
-          .firstWhere((event) => event['name'] == newValue, orElse: () => {});
+      final selectedEvent = seismicEvents.firstWhere(
+          (event) =>
+              "${event['mission_name']} ${event['date']} ${event['time']}" ==
+              newValue,
+          orElse: () => {});
 
       // Update the selected event data
       if (selectedEvent.isNotEmpty) {
         _selectedEventData = selectedEvent;
-        // Focus on the coordinates of the selected event
+
         _controller.focusOnCoordinates(
-          selectedEvent['coordinates'],
+          GlobeCoordinates(
+              selectedEvent['latitude'], selectedEvent['longitude']),
           animate: true,
         );
       } else {
@@ -217,11 +190,14 @@ class ExplorePageState extends State<ExplorePage>
                         }
                         if (texture.contains('mars')) {
                           points = getMarsQuakes(context);
+                          seismicEvents = marsSeismicEvents;
                         } else if (texture.contains('moon')) {
                           points = getMoonQuakes(context);
+                          seismicEvents = moonSeismicEvents;
                         } else {
-                          points = getPoints(
-                              context); // Load Earth points by default
+                          points = getPoints(context);
+                          //! Load Earth points by default
+                          seismicEvents = moonSeismicEvents;
                         }
 
                         // Add the new points to the controller
@@ -336,55 +312,55 @@ class ExplorePageState extends State<ExplorePage>
                     _controller.setZoom(value);
                     setState(() {});
                   })),
-          getDividerText('Quake Points'),
-          ...points
-              .map((e) => getListAction(
-                  e.label ?? '',
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Checkbox(
-                        activeColor: Colors.white,
-                        value: _controller.points
-                            .where((element) => element.id == e.id)
-                            .isNotEmpty,
-                        onChanged: (value) {
-                          if (value == true) {
-                            _controller.addPoint(e);
-                          } else {
-                            _controller.removePoint(e.id);
-                          }
-                          setState(() {});
-                        },
-                      ),
-                      const SizedBox(width: 10),
-                      IconButton(
-                          onPressed: () {
-                            _controller.focusOnCoordinates(e.coordinates,
-                                animate: true);
-                          },
-                          icon: const Icon(Icons.location_on))
-                    ],
-                  ),
-                  secondary: _controller.points
-                          .where((element) => element.id == e.id)
-                          .isNotEmpty
-                      ? Row(
-                          children: [
-                            Slider(
-                                activeColor: Colors.white,
-                                value: e.style.size / 30,
-                                onChanged: (value) {
-                                  value = value * 30;
-                                  _controller.updatePoint(e.id,
-                                      style: e.style.copyWith(size: value));
-                                  e.style = e.style.copyWith(size: value);
-                                  setState(() {});
-                                }),
-                          ],
-                        )
-                      : null))
-              .toList(),
+          // getDividerText('Quake Points'),
+          // ...points
+          //     .map((e) => getListAction(
+          //         e.label ?? '',
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //           children: [
+          //             Checkbox(
+          //               activeColor: Colors.white,
+          //               value: _controller.points
+          //                   .where((element) => element.id == e.id)
+          //                   .isNotEmpty,
+          //               onChanged: (value) {
+          //                 if (value == true) {
+          //                   _controller.addPoint(e);
+          //                 } else {
+          //                   _controller.removePoint(e.id);
+          //                 }
+          //                 setState(() {});
+          //               },
+          //             ),
+          //             const SizedBox(width: 10),
+          //             IconButton(
+          //                 onPressed: () {
+          //                   _controller.focusOnCoordinates(e.coordinates,
+          //                       animate: true);
+          //                 },
+          //                 icon: const Icon(Icons.location_on))
+          //           ],
+          //         ),
+          //         secondary: _controller.points
+          //                 .where((element) => element.id == e.id)
+          //                 .isNotEmpty
+          //             ? Row(
+          //                 children: [
+          //                   Slider(
+          //                       activeColor: Colors.white,
+          //                       value: e.style.size / 30,
+          //                       onChanged: (value) {
+          //                         value = value * 30;
+          //                         _controller.updatePoint(e.id,
+          //                             style: e.style.copyWith(size: value));
+          //                         e.style = e.style.copyWith(size: value);
+          //                         setState(() {});
+          //                       }),
+          //                 ],
+          //               )
+          //             : null))
+          //     .toList(),
         ],
       ),
     );
@@ -497,11 +473,12 @@ class ExplorePageState extends State<ExplorePage>
                               'Select a Seismic Event',
                               style: TextStyle(color: Colors.white),
                             ),
-                            items: _seismicEvents
+                            items: seismicEvents
                                 .map((event) => DropdownMenuItem<String>(
-                                      value: event['name'],
+                                      value:
+                                          "${event['mission_name']} ${event['date']} ${event['time']}",
                                       child: Text(
-                                        event['name'],
+                                        "${event['mission_name']} ${event['date']} ${event['time']}",
                                         style: const TextStyle(
                                           color: Colors.white,
                                         ),
@@ -563,7 +540,7 @@ class ExplorePageState extends State<ExplorePage>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Type: ${_selectedEventData!['type']}',
+                      'Sensor: ${_selectedEventData!['sensor']}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     Text(
@@ -575,19 +552,15 @@ class ExplorePageState extends State<ExplorePage>
                       style: const TextStyle(color: Colors.white),
                     ),
                     Text(
-                      'Epicentre: ${_selectedEventData!['epicenter']}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    Text(
                       'Magnitude: ${_selectedEventData!['magnitude']}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     Text(
-                      'Depth: ${_selectedEventData!['depth']}',
+                      'mission_name: ${_selectedEventData!['mission_name']}',
                       style: const TextStyle(color: Colors.white),
                     ),
                     Text(
-                      'Detected by: ${_selectedEventData!['detectedBy']}',
+                      'url: ${_selectedEventData!['url']}',
                       style: const TextStyle(color: Colors.white),
                     ),
                   ],
