@@ -50,7 +50,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
               opacity: _opacity,
               child: const Center(
                 child: Text(
-                  'QUAKE VISION',
+                  'QUAKE',
                   style: TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,

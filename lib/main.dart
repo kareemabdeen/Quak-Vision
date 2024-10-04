@@ -1,9 +1,10 @@
-import 'package:example/about_screen.dart';
-import 'package:example/contact_screen.dart';
-import 'package:example/custom_app_bar.dart';
-import 'package:example/explore_page.dart';
-import 'package:example/onboarding_page.dart';
+
 import 'package:flutter/material.dart';
+import 'package:quake_vision/about_screen.dart';
+import 'package:quake_vision/contact_screen.dart';
+import 'package:quake_vision/custom_app_bar.dart';
+import 'package:quake_vision/explore_page.dart';
+import 'package:quake_vision/onboarding_page.dart';
 
 void main() {
   runApp(MaterialApp(

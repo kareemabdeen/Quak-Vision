@@ -1,10 +1,10 @@
-import 'package:example/dummy_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe.dart';
 import 'package:flutter_earth_globe/flutter_earth_globe_controller.dart';
 import 'package:flutter_earth_globe/globe_coordinates.dart';
 import 'package:flutter_earth_globe/point.dart';
 import 'package:flutter_earth_globe/point_connection.dart';
+import 'package:quake_vision/dummy_data.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({Key? key}) : super(key: key);
